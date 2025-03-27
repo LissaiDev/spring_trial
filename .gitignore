@@ -1,0 +1,87 @@
+# Diretórios gerais a ignorar
+**/.idea
+**/.vscode
+**/.settings
+**/.classpath
+**/.project
+**/.DS_Store
+**/.env
+**/.env.local
+**/.env.development
+**/.env.test
+**/.env.production
+**/node_modules/
+**/dist/
+**/build/
+**/out/
+**/.next/
+**/.serverless/
+**/.dynamodb/
+**/.cache/
+
+# Arquivos de log
+**/*.log
+**/logs/
+
+# Dependências do Java/Spring
+**/target/
+**/*.jar
+**/*.war
+**/*.ear
+**/*.class
+**/*.factorypath
+
+# Arquivos temporários
+**/*~
+**/*.tmp
+**/*.bak
+
+# Arquivos de configuração específicos
+**/application.properties
+**/application-*.properties
+**/bootstrap.properties
+
+# Next.js específico
+**/.next/cache/
+**/.next/server/chunks/
+**/.next/server/pages/
+**/.next/static/chunks/pages/
+
+# Test coverage
+**/coverage/
+**/jacoco.exec
+**/jacoco-data.exec
+
+# IDE específico
+**/nbproject/private/
+**/nbproject/
+**/eclipse/
+
+# Ferramentas de build
+**/gradle/
+**/gradlew
+**/gradlew.bat
+**/.gradle/
+
+# Maven
+**/pom.xml.versionsBackup
+**/mvnw
+**/mvnw.cmd
+**/.mvn/
+
+# Flyway
+**/flyway-*.sql
+
+# Banco de dados H2 (comum em desenvolvimento Spring)
+**/*.h2.db
+**/*.mv.db
+
+# Arquivos do usuário
+**/*.iml
+**/*.ipr
+**/*.iws
+
+# Arquivos do Docker
+**/docker-compose.yml
+**/Dockerfile
+**/.dockerignore

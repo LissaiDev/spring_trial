@@ -33,7 +33,7 @@ public class UserController {
     private UserService service;
 
     @Autowired
-    private ObjectMapper objectMapper; // Adicione esta linha
+    private ObjectMapper objectMapper;
 
     @GetMapping
     public List<User> getAll() {

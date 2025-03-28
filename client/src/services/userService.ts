@@ -1,6 +1,6 @@
 import { User, UserFormData } from "@/lib/types";
 
-const API_BASE = "/api/users"; // Atualizado para usar o proxy
+const API_BASE = "/api/users";
 
 export const userService = {
     async getAll(): Promise<User[]> {

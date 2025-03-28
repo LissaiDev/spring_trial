@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { Dosis } from "next/font/google";
+import { Lato } from "next/font/google";
 
-const font = Dosis({ subsets: ["latin"] });
+const font = Lato({ subsets: ["latin"], weight: "400" });
 
 export const metadata: Metadata = {
     title: "ls_dev",

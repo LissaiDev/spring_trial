@@ -20,6 +20,28 @@ export function useUsers() {
         }
     }, []);
 
+    const updateUser = useCallback(
+        async (id: number, data: Partial<UserFormData>) => {
+            try {
+                setLoading(true);
+                const updatedUser = await userService.update(id, data);
+                setUsers((prev) =>
+                    prev.map((user) => (user.id === id ? updatedUser : user)),
+                );
+                setError(null);
+                return updatedUser;
+            } catch (err) {
+                setError(
+                    err instanceof Error ? err.message : "An error occurred",
+                );
+                throw err;
+            } finally {
+                setLoading(false);
+            }
+        },
+        [],
+    );
+
     const createUser = useCallback(async (data: UserFormData) => {
         try {
             setLoading(true);
@@ -56,5 +78,6 @@ export function useUsers() {
         fetchUsers,
         createUser,
         deleteUser,
+        updateUser,
     };
 }

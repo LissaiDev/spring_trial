@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.server.server.model.User;
 import com.server.server.service.UserService;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -77,24 +78,58 @@ public class UserController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<User> update(
         @PathVariable Long id,
-        @RequestBody User updatedUser
+        @RequestPart(value = "user", required = true) String userStr,
+        @RequestPart(value = "photo", required = false) MultipartFile photo
     ) {
-        return service
-            .getById(id)
-            .map(user -> {
-                user.setName(updatedUser.getName());
-                user.setNickname(updatedUser.getNickname());
-                user.setBirthDate(updatedUser.getBirthDate());
-                user.setCountry(updatedUser.getCountry());
-                user.setProvince(updatedUser.getProvince());
-                user.setNeighborhood(updatedUser.getNeighborhood());
-                user.setEmail(updatedUser.getEmail());
-                return ResponseEntity.ok(service.save(user));
-            })
-            .orElse(ResponseEntity.notFound().build());
+        try {
+            objectMapper.registerModule(new JavaTimeModule());
+            User updatedUser = objectMapper.readValue(userStr, User.class);
+
+            return service
+                .getById(id)
+                .map(user -> {
+                    user.setName(updatedUser.getName());
+                    user.setNickname(updatedUser.getNickname());
+                    user.setBirthDate(updatedUser.getBirthDate());
+                    user.setCountry(updatedUser.getCountry());
+                    user.setProvince(updatedUser.getProvince());
+                    user.setNeighborhood(updatedUser.getNeighborhood());
+                    user.setEmail(updatedUser.getEmail());
+
+                    // Se uma nova foto foi enviada
+                    if (photo != null && !photo.isEmpty()) {
+                        try {
+                            String fileName =
+                                System.currentTimeMillis() +
+                                "_" +
+                                photo.getOriginalFilename();
+                            String photoPath = uploadDir + "/" + fileName;
+
+                            Files.copy(
+                                photo.getInputStream(),
+                                Paths.get(photoPath),
+                                StandardCopyOption.REPLACE_EXISTING
+                            );
+
+                            user.setPhotoUrl("/uploads/" + fileName);
+                        } catch (IOException e) {
+                            throw new RuntimeException(
+                                "Erro ao salvar a foto",
+                                e
+                            );
+                        }
+                    }
+
+                    return ResponseEntity.ok(service.save(user));
+                })
+                .orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            logger.error("Erro ao processar atualização: ", e);
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/{id}")

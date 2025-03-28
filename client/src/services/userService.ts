@@ -42,13 +42,19 @@ export const userService = {
         return response.json();
     },
 
-    async update(id: number, data: Partial<User>): Promise<User> {
+    async update(id: number, data: Partial<UserFormData>): Promise<User> {
+        const formData = new FormData();
+        const userData = { ...data };
+        delete (userData as { photo?: File }).photo;
+
+        formData.append("user", JSON.stringify(userData));
+        if (data.photo) {
+            formData.append("photo", data.photo);
+        }
+
         const response = await fetch(`${API_BASE}/${id}`, {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
+            body: formData,
         });
 
         if (!response.ok) throw new Error("Failed to update user");

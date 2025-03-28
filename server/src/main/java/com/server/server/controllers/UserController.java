@@ -1,13 +1,18 @@
 package com.server.server.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.server.server.model.User;
 import com.server.server.service.UserService;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,11 +21,18 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/users")
 public class UserController {
 
+    private static final Logger logger = LoggerFactory.getLogger(
+        UserController.class
+    );
+
     @Value("${file.upload-dir}")
     private String uploadDir;
 
     @Autowired
     private UserService service;
+
+    @Autowired
+    private ObjectMapper objectMapper; // Adicione esta linha
 
     @GetMapping
     public List<User> getAll() {
@@ -35,17 +47,21 @@ public class UserController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public User create(
-        @RequestPart("user") User user,
-        @RequestPart("photo") MultipartFile photo
+        @RequestPart(value = "user") String userStr,
+        @RequestPart(value = "photo") MultipartFile photo
     ) {
         try {
+            logger.info("Recebendo requisição com userStr: " + userStr);
+            logger.info("Nome do arquivo: " + photo.getOriginalFilename());
+
+            objectMapper.registerModule(new JavaTimeModule());
+            User user = objectMapper.readValue(userStr, User.class);
+
             String fileName =
                 System.currentTimeMillis() + "_" + photo.getOriginalFilename();
             String photoPath = uploadDir + "/" + fileName;
-
-            validateFile(photo);
 
             Files.copy(
                 photo.getInputStream(),
@@ -54,10 +70,11 @@ public class UserController {
             );
 
             user.setPhotoUrl("/uploads/" + fileName);
+            return service.save(user);
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao salvar arquivo", e);
+            logger.error("Erro ao processar requisição: ", e);
+            throw new RuntimeException("Erro ao processar requisição", e);
         }
-        return service.save(user);
     }
 
     @PutMapping("/{id}")

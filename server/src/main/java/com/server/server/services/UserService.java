@@ -1,4 +1,4 @@
-package com.server.server.service;
+package com.server.server.services;
 
 import com.server.server.model.User;
 import com.server.server.repository.UserRepository;

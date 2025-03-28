@@ -3,6 +3,7 @@ package com.server.server.config;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +19,10 @@ public class FileStorageConfig implements WebMvcConfigurer {
     @PostConstruct
     public void init() {
         try {
-            Files.createDirectories(Paths.get(uploadDir));
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
         } catch (IOException e) {
             throw new RuntimeException(
                 "Não foi possível criar o diretório de upload: " + uploadDir,
@@ -29,8 +33,11 @@ public class FileStorageConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        String uploadPath = Paths.get(uploadDir).toAbsolutePath().toString();
         registry
             .addResourceHandler("/uploads/**")
-            .addResourceLocations("file:" + uploadDir + "/");
+            .addResourceLocations("file:" + uploadPath + "/")
+            .setCachePeriod(3600) // Cache por 1 hora
+            .resourceChain(true);
     }
 }
